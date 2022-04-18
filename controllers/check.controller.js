@@ -10,10 +10,17 @@ exports.createCheck = async (req, res) => {
   try {
     const check = await checkService.createCheck(req.user._id, req.body);
 
-    const resp = await reportService.getStatus(req.body.url);
+    const resp = await reportService.getStatus(
+      req.body.url,
+      req.body.protocol,
+      req.body.path,
+      req.body.port,
+      req.body.timeout,
+      req.body.authentication
+    );
     const report = await reportService.createCheckReport(
       req.user._id,
-      check._id,
+      check,
       resp
     );
     return res

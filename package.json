@@ -28,7 +28,9 @@
     "mongoose": "^6.3.0",
     "mongoose-unique-validator": "^3.0.0",
     "node-cron": "^3.0.0",
-    "request": "^2.88.2"
+    "nodemailer": "^6.7.3",
+    "request": "^2.88.2",
+    "socket.io": "^4.4.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

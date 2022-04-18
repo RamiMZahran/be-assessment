@@ -11,6 +11,11 @@ const { task } = require('./utilities/cron');
 
 const app = express();
 
+// Socket IO configuration
+const http = require('http').Server(app);
+const SocketIO = require('socket.io');
+const io = SocketIO(http);
+
 mongoose
   .connect(process.env.DB_URL)
   .then(() => {
@@ -48,3 +53,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });
+
+exports.io = io;

@@ -51,6 +51,7 @@ const reportSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+    nextCheckTime: { type: Date, required: true },
   },
   { timestamps: true }
 );

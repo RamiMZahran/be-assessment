@@ -2,9 +2,17 @@ const request = require('request');
 
 const { Report } = require('../models/Report');
 
-exports.getStatus = (url) => {
+exports.getStatus = (url, protocol, path, port, timeout, authentication) => {
   return new Promise((resolve, reject) => {
-    request.get({ url, time: true, body: false }, function (error, response) {
+    const requestOptions = {
+      url: protocol.toLowerCase() + url,
+      time: true,
+      timeout,
+    };
+    if (port) requestOptions.port = port;
+    if (path) requestOptions.url += path;
+    if (authentication) requestOptions.auth = authentication;
+    request.get(requestOptions, function (error, response) {
       resolve({
         site: url,
         responseTime: response.elapsedTime,
@@ -14,10 +22,14 @@ exports.getStatus = (url) => {
   });
 };
 
-exports.createCheckReport = async (userId, checkId, statusResponse) => {
+exports.createCheckReport = async (userId, check, statusResponse) => {
+  const nextCheckTime = new Date();
+  nextCheckTime.setMinutes(
+    nextCheckTime.getMinutes() + check.intervalInMinutes
+  );
   const report = new Report({
     user: userId,
-    check: checkId,
+    check: check._id,
     status: statusResponse.status,
     availability: statusResponse.status == 'OK' ? 100 : 0,
     outages: statusResponse.status == 'OK' ? 0 : 1,
@@ -26,13 +38,17 @@ exports.createCheckReport = async (userId, checkId, statusResponse) => {
     responseTime: statusResponse.responseTime / 1000,
     updatesNumber: 1,
     history: [],
+    nextCheckTime: nextCheckTime,
   });
   await report.save();
   return report;
 };
 
 exports.updateCheckReport = async (userId, checkId, statusResponse) => {
-  const report = await Report.findOne({ check: checkId, user: userId });
+  const report = await Report.findOne({
+    check: checkId,
+    user: userId,
+  }).populate('check');
   if (!report) return null;
 
   console.log(report.history);
@@ -55,7 +71,14 @@ exports.updateCheckReport = async (userId, checkId, statusResponse) => {
       (new Date() - new Date(report.updatedAt)) * 1000;
   }
   report.status = statusResponse.status;
+  const nextCheckTime = new Date();
+  nextCheckTime.setMinutes(
+    nextCheckTime.getMinutes() + report.check.intervalInMinutes
+  );
+  report.nextCheckTime = nextCheckTime;
   const reportObj = report.toObject();
+
+  reportObj.check = reportObj.check._id;
   delete reportObj.history;
   await Report.updateOne(
     { _id: report._id },
@@ -102,7 +125,11 @@ exports.getAllCheckReports = async (userId, groupBy) => {
   return reports;
 };
 
-exports.getAllReports = async () => {
-  let reports = await Report.find().populate('check');
+exports.getReports = async () => {
+  let reports = await Report.find({
+    nextCheckTime: { $lte: new Date() },
+  })
+    .populate('check')
+    .populate('user');
   return reports;
 };
