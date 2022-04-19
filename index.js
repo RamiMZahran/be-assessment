@@ -17,7 +17,11 @@ const SocketIO = require('socket.io');
 const io = SocketIO(http);
 
 mongoose
-  .connect(process.env.DB_URL)
+  .connect(
+    process.env.NODE_ENV === 'test'
+      ? process.env.DB_URL_TEST
+      : process.env.DB_URL
+  )
   .then(() => {
     console.log('DB Connected successfully!');
   })
@@ -27,8 +31,7 @@ mongoose
     );
     console.log(err);
   });
-
-task.start();
+if (process.env.NODE_ENV !== 'test') task.start();
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -50,8 +53,9 @@ app.use('/api/checks', checkRoutes);
 app.use('/api/reports', reportRoutes);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });
 
 exports.io = io;
+module.exports = server;

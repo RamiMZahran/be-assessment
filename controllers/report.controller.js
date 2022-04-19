@@ -9,7 +9,7 @@ exports.getCheckReport = async (req, res) => {
 
     if (!report) return res.status(404).send({ error: 'Report not found!' });
 
-    return res.status(200).send({ msg: 'Report fetched successfully', check });
+    return res.status(200).send({ msg: 'Report fetched successfully', report });
   } catch (err) {
     return res.status(500).send({ error: 'Error fetching report' });
   }

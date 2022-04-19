@@ -5,7 +5,7 @@ const { Report } = require('../models/Report');
 exports.getStatus = (url, protocol, path, port, timeout, authentication) => {
   return new Promise((resolve, reject) => {
     const requestOptions = {
-      url: protocol.toLowerCase() + url,
+      url: protocol.toLowerCase() + '://' + url,
       time: true,
       timeout,
     };

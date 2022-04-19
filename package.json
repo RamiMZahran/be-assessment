@@ -4,7 +4,8 @@
   "description": "Build an uptime monitoring RESTful API server that allows authenticated users to monitor URLs, and get detailed uptime reports about their availability, average response time, and total uptime/downtime.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha tests/*.test.js --timeout 20000",
+    "test:watch": "nodemon --exec \"npm test\"",
     "start": "node index.js",
     "start:watch": "nodemon index.js"
   },
@@ -33,6 +34,9 @@
     "socket.io": "^4.4.1"
   },
   "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^9.2.2",
     "nodemon": "^2.0.15"
   }
 }

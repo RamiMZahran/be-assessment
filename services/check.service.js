@@ -46,7 +46,7 @@ exports.updateCheck = async (userId, checkId, body) => {
 
 exports.deleteCheck = async (userId, checkId) => {
   const check = await Check.deleteOne({ _id: checkId, user: userId });
-  if (check.nModified === 0) return false;
+  if (check.deletedCount === 0) return false;
 
   return true;
 };
@@ -60,7 +60,7 @@ exports.getCheck = async (userId, checkId) => {
 
 exports.getAllChecks = async (userId, groupBy) => {
   let checks = await Check.aggregate([{ $match: { user: userId } }]);
-  if (groupBy) {
+  if (groupBy === 'tags') {
     checks = checks.reduce((prevVal, currentVal) => {
       if (currentVal.tags.length > 0) {
         currentVal.tags.map((tag) => {
